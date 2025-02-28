@@ -1,7 +1,8 @@
 from fastapi import status, APIRouter, HTTPException
 from database import DatabaseSession
-from .schemas import UserPublic, UserCreate
+from .schemas import UserPublic, UserCreate, UserLogin
 from .services import UserService
+from .utils import verify_password, create_token
 
 
 router = APIRouter()
@@ -23,3 +24,16 @@ def create_account(data: UserCreate, session: DatabaseSession):
 
     user = user_service.create(session, data)
     return user
+
+
+@router.post("/signin")
+def login(data: UserLogin, session: DatabaseSession):
+    user = user_service.get_by_username(session, data.username)
+
+    if not user or not verify_password(data.password, user.password):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid credentials")
+
+    user_data = {"id": user.id}
+    access_token = create_token(user_data)
+    refresh_token = create_token(user_data, is_refresh=True)
+    return {"access_token": access_token, "refresh_token": refresh_token}

@@ -18,3 +18,8 @@ class UserCreate(SQLModel):
     )
     password: str = Field(max_length=150)
     email: EmailStr = Field(max_length=150)
+
+
+class UserLogin(SQLModel):
+    username: str
+    password: str
