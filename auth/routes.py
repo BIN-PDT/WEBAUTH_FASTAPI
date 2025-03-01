@@ -2,6 +2,7 @@ from fastapi import status, APIRouter, HTTPException
 from database import DatabaseSession
 from .schemas import UserPublic, UserCreate, UserLogin
 from .services import UserService
+from .dependencies import AccessTokenRequired, RefreshTokenRequired
 from .utils import verify_password, create_token
 
 
@@ -37,3 +38,8 @@ def login(data: UserLogin, session: DatabaseSession):
     access_token = create_token(user_data)
     refresh_token = create_token(user_data, is_refresh=True)
     return {"access_token": access_token, "refresh_token": refresh_token}
+
+
+@router.get("/refresh_token")
+def refresh_token(token_data: RefreshTokenRequired):
+    return {"access_token": create_token(token_data["user"])}
