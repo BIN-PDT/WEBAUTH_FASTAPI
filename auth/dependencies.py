@@ -3,10 +3,11 @@ from fastapi.security import HTTPBearer
 from datetime import datetime, timezone
 from abc import ABCMeta, abstractmethod
 from typing import Annotated
+from utils import SingletonPattern
 from .utils import decode_token
 
 
-class TokenBearer(HTTPBearer, metaclass=ABCMeta):
+class TokenBearer(SingletonPattern, HTTPBearer, metaclass=ABCMeta):
     def __init__(self, auto_error: bool = True):
         super().__init__(auto_error=auto_error)
 

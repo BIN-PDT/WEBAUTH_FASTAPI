@@ -7,29 +7,28 @@ from .utils import verify_password, create_token
 
 
 router = APIRouter()
-user_service = UserService()
 
 
 @router.post("/signup", response_model=UserPublic, status_code=status.HTTP_201_CREATED)
 def create_account(data: UserCreate, session: DatabaseSession):
-    if user_service.get_by_username(session, data.username):
+    if UserService().get_by_username(session, data.username):
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST,
             "User with username already exists",
         )
-    if user_service.get_by_email(session, data.email):
+    if UserService().get_by_email(session, data.email):
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST,
             "User with email already exists",
         )
 
-    user = user_service.create(session, data)
+    user = UserService().create(session, data)
     return user
 
 
 @router.post("/signin")
 def login(data: UserLogin, session: DatabaseSession):
-    user = user_service.get_by_username(session, data.username)
+    user = UserService().get_by_username(session, data.username)
 
     if not user or not verify_password(data.password, user.password):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid credentials")

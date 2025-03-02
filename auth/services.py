@@ -1,10 +1,11 @@
 from sqlmodel import Session, select
+from utils import SingletonPattern
 from .models import User
 from .schemas import UserCreate
 from .utils import get_password_hash
 
 
-class UserService:
+class UserService(SingletonPattern):
     def get_by_username(self, session: Session, username: str):
         statement = select(User).where(User.username == username)
 
