@@ -42,3 +42,9 @@ def login(data: UserLogin, session: DatabaseSession):
 @router.get("/refresh_token")
 def refresh_token(token_data: RefreshTokenRequired):
     return {"access_token": create_token(token_data["user"])}
+
+
+@router.get("/logout")
+def logout(token_data: AccessTokenRequired):
+    # REVOKE TOKEN HERE.
+    return {"message": "Logged out successfully"}
