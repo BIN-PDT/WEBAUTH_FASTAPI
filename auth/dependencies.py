@@ -1,9 +1,15 @@
-from fastapi import status, Request, HTTPException, Depends
+from fastapi import Request, Depends
 from fastapi.security import HTTPBearer
 from datetime import datetime, timezone
 from abc import ABCMeta, abstractmethod
 from typing import Annotated
 from database import DatabaseSession
+from errors import (
+    InvalidTokenError,
+    AccessTokenRequiredError,
+    RefreshTokenRequiredError,
+    InsufficientPermissionError,
+)
 from utils import SingletonPattern
 from .models import RoleEnum, User
 from .services import UserService
@@ -19,9 +25,7 @@ class TokenBearer(SingletonPattern, HTTPBearer, metaclass=ABCMeta):
 
         token_data = decode_token(creds.credentials)
         if token_data is None or not self.validate_token(token_data):
-            raise HTTPException(
-                status.HTTP_403_FORBIDDEN, "Invalid or expired credentials"
-            )
+            raise InvalidTokenError()
         self.verify_token(token_data)
 
         return token_data
@@ -39,19 +43,13 @@ class TokenBearer(SingletonPattern, HTTPBearer, metaclass=ABCMeta):
 class AccessTokenBearer(TokenBearer):
     def verify_token(self, token_data: dict) -> None:
         if token_data["refresh"]:
-            raise HTTPException(
-                status.HTTP_403_FORBIDDEN,
-                "Please provide an access token",
-            )
+            raise AccessTokenRequiredError()
 
 
 class RefreshTokenBearer(TokenBearer):
     def verify_token(self, token_data: dict) -> None:
         if not token_data["refresh"]:
-            raise HTTPException(
-                status.HTTP_403_FORBIDDEN,
-                "Please provide a refresh token",
-            )
+            raise RefreshTokenRequiredError()
 
 
 AccessTokenRequired = Annotated[dict, Depends(AccessTokenBearer())]
@@ -73,10 +71,7 @@ class RoleChecker:
 
     def __call__(self, user: CurrentUser):
         if user.role not in self.allowed_roles:
-            raise HTTPException(
-                status.HTTP_403_FORBIDDEN,
-                "You are not allowed to perform this action",
-            )
+            raise InsufficientPermissionError()
 
 
 OnlyAdmin = Depends(RoleChecker([RoleEnum.ADMIN]))

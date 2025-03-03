@@ -1,5 +1,10 @@
 from fastapi import status, APIRouter, HTTPException
 from database import DatabaseSession
+from errors import (
+    UsernameAlreadyExistsError,
+    EmailAlreadyExistsError,
+    InvalidCredentialsError,
+)
 from .schemas import UserPublic, UserCreate, UserLogin
 from .services import UserService
 from .dependencies import AccessTokenRequired, RefreshTokenRequired
@@ -12,15 +17,9 @@ router = APIRouter()
 @router.post("/signup", response_model=UserPublic, status_code=status.HTTP_201_CREATED)
 def create_account(data: UserCreate, session: DatabaseSession):
     if UserService().get_by_username(session, data.username):
-        raise HTTPException(
-            status.HTTP_400_BAD_REQUEST,
-            "User with username already exists",
-        )
+        raise UsernameAlreadyExistsError()
     if UserService().get_by_email(session, data.email):
-        raise HTTPException(
-            status.HTTP_400_BAD_REQUEST,
-            "User with email already exists",
-        )
+        raise EmailAlreadyExistsError()
 
     user = UserService().create(session, data)
     return user
@@ -31,7 +30,7 @@ def login(data: UserLogin, session: DatabaseSession):
     user = UserService().get_by_username(session, data.username)
 
     if not user or not verify_password(data.password, user.password):
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid credentials")
+        raise InvalidCredentialsError()
 
     user_data = {"id": user.id}
     access_token = create_token(user_data)
