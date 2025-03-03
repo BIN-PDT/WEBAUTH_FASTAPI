@@ -6,6 +6,13 @@ from .utils import get_password_hash
 
 
 class UserService(SingletonPattern):
+    def get_by_id(self, session: Session, id: int):
+        statement = select(User).where(User.id == id)
+
+        result = session.exec(statement)
+        user = result.first()
+        return user
+
     def get_by_username(self, session: Session, username: str):
         statement = select(User).where(User.username == username)
 

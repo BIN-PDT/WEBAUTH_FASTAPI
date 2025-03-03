@@ -3,7 +3,10 @@ from fastapi.security import HTTPBearer
 from datetime import datetime, timezone
 from abc import ABCMeta, abstractmethod
 from typing import Annotated
+from database import DatabaseSession
 from utils import SingletonPattern
+from .models import RoleEnum, User
+from .services import UserService
 from .utils import decode_token
 
 
@@ -53,3 +56,29 @@ class RefreshTokenBearer(TokenBearer):
 
 AccessTokenRequired = Annotated[dict, Depends(AccessTokenBearer())]
 RefreshTokenRequired = Annotated[dict, Depends(RefreshTokenBearer())]
+
+
+def get_current_user(session: DatabaseSession, token_data: AccessTokenRequired):
+    user_id = token_data["user"]["id"]
+    user = UserService().get_by_id(session, user_id)
+    return user
+
+
+CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+class RoleChecker:
+    def __init__(self, allowed_roles: list[RoleEnum]):
+        self.allowed_roles = allowed_roles
+
+    def __call__(self, user: CurrentUser):
+        if user.role not in self.allowed_roles:
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN,
+                "You are not allowed to perform this action",
+            )
+
+
+OnlyAdmin = Depends(RoleChecker([RoleEnum.ADMIN]))
+OnlyUser = Depends(RoleChecker([RoleEnum.USER]))
+AllowAdminUser = Depends(RoleChecker([RoleEnum.ADMIN, RoleEnum.USER]))
