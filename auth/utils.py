@@ -1,10 +1,12 @@
 from passlib.context import CryptContext
 import jwt
+from itsdangerous import URLSafeTimedSerializer
 from datetime import datetime, timezone, timedelta
 from config import settings
 
 
 pwd_context = CryptContext(schemes=["bcrypt"])
+ust_serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -15,7 +17,7 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 
-def create_token(data: dict, is_refresh: bool = False):
+def create_jwt_token(data: dict, is_refresh: bool = False) -> str:
     payload = {}
     payload["user"] = data
     payload["refresh"] = is_refresh
@@ -35,13 +37,25 @@ def create_token(data: dict, is_refresh: bool = False):
     return token
 
 
-def decode_token(token: str) -> dict:
+def decode_jwt_token(token: str) -> dict | None:
     try:
         data = jwt.decode(
             token,
             key=settings.SECRET_KEY,
             algorithms=[settings.JWT_ALGORITHM],
         )
+        return data
+    except:
+        return None
+
+
+def create_url_safe_token(data: dict) -> str:
+    return ust_serializer.dumps(data)
+
+
+def decode_url_safe_token(token: str) -> dict | None:
+    try:
+        data = ust_serializer.loads(token)
         return data
     except:
         return None

@@ -39,3 +39,8 @@ class RefreshTokenRequiredError(BaseError):
 class InsufficientPermissionError(BaseError):
     status_code = status.HTTP_403_FORBIDDEN
     detail = {"message": "You are not allowed to perform this action"}
+
+
+class UserNotFoundError(BaseError):
+    status_code = status.HTTP_404_NOT_FOUND
+    detail = {"message": "User not found"}

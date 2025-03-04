@@ -20,6 +20,10 @@ class UserCreate(SQLModel):
     email: EmailStr = Field(max_length=150)
 
 
+class UserUpdate(SQLModel):
+    is_verified: bool | None
+
+
 class UserLogin(SQLModel):
     username: str
     password: str

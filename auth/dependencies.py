@@ -13,7 +13,7 @@ from errors import (
 from utils import SingletonPattern
 from .models import RoleEnum, User
 from .services import UserService
-from .utils import decode_token
+from .utils import decode_jwt_token
 
 
 class TokenBearer(SingletonPattern, HTTPBearer, metaclass=ABCMeta):
@@ -23,7 +23,7 @@ class TokenBearer(SingletonPattern, HTTPBearer, metaclass=ABCMeta):
     async def __call__(self, request: Request) -> dict:
         creds = await super().__call__(request)
 
-        token_data = decode_token(creds.credentials)
+        token_data = decode_jwt_token(creds.credentials)
         if token_data is None or not self.validate_token(token_data):
             raise InvalidTokenError()
         self.verify_token(token_data)
