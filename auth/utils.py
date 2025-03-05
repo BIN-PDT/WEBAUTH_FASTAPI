@@ -55,7 +55,10 @@ def create_url_safe_token(data: dict) -> str:
 
 def decode_url_safe_token(token: str) -> dict | None:
     try:
-        data = ust_serializer.loads(token)
+        data = ust_serializer.loads(
+            token,
+            max_age=settings.EMAIL_VERIFICATION_TOKEN_EXPIRY,
+        )
         return data
     except:
         return None

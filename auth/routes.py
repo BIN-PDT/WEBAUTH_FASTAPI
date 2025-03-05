@@ -68,6 +68,8 @@ def logout(token_data: AccessTokenRequired):
 @router.get("/verify/{token}", name="verify_email")
 def verify_email_account(token: str, session: DatabaseSession):
     token_data = decode_url_safe_token(token)
+    if token_data is None:
+        raise InvalidTokenError()
     user_email = token_data.get("email")
     if user_email is None:
         raise InvalidTokenError()
