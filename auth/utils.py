@@ -39,12 +39,11 @@ def create_jwt_token(data: dict, is_refresh: bool = False) -> str:
 
 def decode_jwt_token(token: str) -> dict | None:
     try:
-        data = jwt.decode(
+        return jwt.decode(
             token,
             key=settings.SECRET_KEY,
             algorithms=[settings.JWT_ALGORITHM],
         )
-        return data
     except:
         return None
 
@@ -53,12 +52,8 @@ def create_url_safe_token(data: dict) -> str:
     return ust_serializer.dumps(data)
 
 
-def decode_url_safe_token(token: str) -> dict | None:
+def decode_url_safe_token(token: str, expiry: int) -> dict | None:
     try:
-        data = ust_serializer.loads(
-            token,
-            max_age=settings.EMAIL_VERIFICATION_TOKEN_EXPIRY,
-        )
-        return data
+        return ust_serializer.loads(token, max_age=expiry)
     except:
         return None

@@ -21,9 +21,19 @@ class UserCreate(SQLModel):
 
 
 class UserUpdate(SQLModel):
-    is_verified: bool | None
+    password: str | None = None
+    is_verified: bool | None = None
 
 
 class UserLogin(SQLModel):
     username: str
     password: str
+
+
+class PasswordResetRequest(SQLModel):
+    email: str
+
+
+class PasswordResetConfirm(SQLModel):
+    new_password: str
+    confirm_password: str

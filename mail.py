@@ -27,16 +27,31 @@ async def send_message(recipients: list[str], subject: str, body: str):
     await mail.send_message(message)
 
 
-async def send_verification_message(email: str, verification_link: str):
+async def send_email_verification_message(email: str, verification_link: str):
     html_message = f"""
         <div style="font-style: italic;">
             <p>Welcome! We are sending this email to notify you about an important event.</p>
-            <p>Please click the <a href="{ verification_link }">link</a> to verify your account.</p>
+            <p>Please click the <a href="{verification_link}">link</a> to verify your account.</p>
             <p>Best regards,<br>FastAPI</p>
         </div>
     """
     await send_message(
         recipients=[email],
         subject="Account Verification",
+        body=html_message,
+    )
+
+
+async def send_password_reset_message(email: str, verification_link: str):
+    html_message = f"""
+        <div style="font-style: italic;">
+            <p>Welcome! We are sending this email to notify you about an important event.</p>
+            <p>Please click the <a href="{verification_link}">link</a> to reset your account password.</p>
+            <p>Best regards,<br>FastAPI</p>
+        </div>
+    """
+    await send_message(
+        recipients=[email],
+        subject="Password Reset",
         body=html_message,
     )

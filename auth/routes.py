@@ -1,17 +1,26 @@
 from fastapi import status, APIRouter, Request
+from config import settings
 from database import DatabaseSession
-from mail import send_verification_message
+from mail import send_email_verification_message, send_password_reset_message
 from errors import (
     UsernameAlreadyExistsError,
     EmailAlreadyExistsError,
     InvalidCredentialsError,
     InvalidTokenError,
     UserNotFoundError,
+    NewPasswordMismatchConfirmPasswordError,
 )
-from .schemas import UserCreate, UserUpdate, UserLogin
+from .schemas import (
+    UserCreate,
+    UserUpdate,
+    UserLogin,
+    PasswordResetRequest,
+    PasswordResetConfirm,
+)
 from .services import UserService
 from .dependencies import AccessTokenRequired, RefreshTokenRequired
 from .utils import (
+    get_password_hash,
     verify_password,
     create_jwt_token,
     create_url_safe_token,
@@ -33,12 +42,30 @@ async def create_account(request: Request, data: UserCreate, session: DatabaseSe
 
     token = create_url_safe_token({"email": user.email})
     verification_link = request.url_for("verify_email", token=token)
-    await send_verification_message(user.email, verification_link)
+    await send_email_verification_message(user.email, verification_link)
 
     return {
         "message": "Signed up successfully! Please check email to verify your account",
         "user": user,
     }
+
+
+@router.get("/verify/{token}", name="verify_email")
+def verify_email_account(token: str, session: DatabaseSession):
+    token_data = decode_url_safe_token(token, settings.EMAIL_VERIFICATION_TOKEN_EXPIRY)
+    if token_data is None:
+        raise InvalidTokenError()
+    user_email = token_data.get("email")
+    if user_email is None:
+        raise InvalidTokenError()
+    user = UserService().get_by_email(session, user_email)
+    if user is None:
+        raise UserNotFoundError()
+
+    update_data = UserUpdate(is_verified=True)
+    UserService().update(session, user, update_data)
+
+    return {"message": "Account verified successfully"}
 
 
 @router.post("/signin")
@@ -65,19 +92,35 @@ def logout(token_data: AccessTokenRequired):
     return {"message": "Logged out successfully"}
 
 
-@router.get("/verify/{token}", name="verify_email")
-def verify_email_account(token: str, session: DatabaseSession):
-    token_data = decode_url_safe_token(token)
+@router.post("/request_reset_password")
+async def request_reset_password(data: PasswordResetRequest):
+    # LINK TO CONFIRM PASSWORD RESET INTERFACE.
+    token = create_url_safe_token({"email": data.email})
+    verification_link = f".../{token}"
+    await send_password_reset_message(data.email, verification_link)
+
+    return {
+        "message": "Requested successfully! Please check email to reset your account password"
+    }
+
+
+@router.post("/reset_password/{token}")
+def reset_password(token: str, data: PasswordResetConfirm, session: DatabaseSession):
+    token_data = decode_url_safe_token(token, settings.PASSWORD_RESET_TOKEN_EXPIRY)
     if token_data is None:
         raise InvalidTokenError()
     user_email = token_data.get("email")
     if user_email is None:
         raise InvalidTokenError()
+    if data.new_password != data.confirm_password:
+        raise NewPasswordMismatchConfirmPasswordError()
+
     user = UserService().get_by_email(session, user_email)
     if user is None:
         raise UserNotFoundError()
 
-    update_data = UserUpdate(is_verified=True)
+    hashed_password = get_password_hash(data.new_password)
+    update_data = UserUpdate(password=hashed_password)
     UserService().update(session, user, update_data)
 
-    return {"message": "Account verified successfully"}
+    return {"message": "Account password reset successfully"}

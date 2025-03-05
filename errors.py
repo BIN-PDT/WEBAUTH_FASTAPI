@@ -44,3 +44,8 @@ class InsufficientPermissionError(BaseError):
 class UserNotFoundError(BaseError):
     status_code = status.HTTP_404_NOT_FOUND
     detail = {"message": "User not found"}
+
+
+class NewPasswordMismatchConfirmPasswordError(BaseError):
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail = {"message": "New password does not match the confirm password"}

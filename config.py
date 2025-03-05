@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     MAIL_SSL_TLS: bool = False
     MAIL_FROM_NAME: str = "FastAPI"
     EMAIL_VERIFICATION_TOKEN_EXPIRY: int = 900
+    PASSWORD_RESET_TOKEN_EXPIRY: int = 900
 
     model_config = SettingsConfigDict(env_file=".env", extra="forbid")
 
