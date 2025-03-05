@@ -1,4 +1,4 @@
-from fastapi import status, APIRouter, Request
+from fastapi import status, APIRouter, Request, BackgroundTasks
 from config import settings
 from database import DatabaseSession
 from mail import send_email_verification_message, send_password_reset_message
@@ -32,7 +32,12 @@ router = APIRouter()
 
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
-async def create_account(request: Request, data: UserCreate, session: DatabaseSession):
+async def create_account(
+    request: Request,
+    data: UserCreate,
+    session: DatabaseSession,
+    background_tasks: BackgroundTasks,
+):
     if UserService().get_by_username(session, data.username):
         raise UsernameAlreadyExistsError()
     if UserService().get_by_email(session, data.email):
@@ -42,7 +47,9 @@ async def create_account(request: Request, data: UserCreate, session: DatabaseSe
 
     token = create_url_safe_token({"email": user.email})
     verification_link = request.url_for("verify_email", token=token)
-    await send_email_verification_message(user.email, verification_link)
+    background_tasks.add_task(
+        send_email_verification_message, user.email, verification_link
+    )
 
     return {
         "message": "Signed up successfully! Please check email to verify your account",
@@ -92,12 +99,17 @@ def logout(token_data: AccessTokenRequired):
     return {"message": "Logged out successfully"}
 
 
-@router.post("/request_reset_password")
-async def request_reset_password(data: PasswordResetRequest):
+@router.post("/request_password_reset")
+async def request_password_reset(
+    data: PasswordResetRequest,
+    background_tasks: BackgroundTasks,
+):
     # LINK TO CONFIRM PASSWORD RESET INTERFACE.
     token = create_url_safe_token({"email": data.email})
     verification_link = f".../{token}"
-    await send_password_reset_message(data.email, verification_link)
+    background_tasks.add_task(
+        send_password_reset_message, data.email, verification_link
+    )
 
     return {
         "message": "Requested successfully! Please check email to reset your account password"
@@ -114,7 +126,6 @@ def reset_password(token: str, data: PasswordResetConfirm, session: DatabaseSess
         raise InvalidTokenError()
     if data.new_password != data.confirm_password:
         raise NewPasswordMismatchConfirmPasswordError()
-
     user = UserService().get_by_email(session, user_email)
     if user is None:
         raise UserNotFoundError()
