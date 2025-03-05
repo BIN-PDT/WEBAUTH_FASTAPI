@@ -1,7 +1,7 @@
 from fastapi import status, APIRouter, Request, BackgroundTasks
 from config import settings
 from database import DatabaseSession
-from mail import send_email_verification_message, send_password_reset_message
+from mail import send_message
 from errors import (
     UsernameAlreadyExistsError,
     EmailAlreadyExistsError,
@@ -45,11 +45,18 @@ async def create_account(
 
     user = UserService().create(session, data)
 
-    token = create_url_safe_token({"email": user.email})
+    user_email = user.email
+    token = create_url_safe_token({"email": user_email})
     verification_link = request.url_for("verify_email", token=token)
-    background_tasks.add_task(
-        send_email_verification_message, user.email, verification_link
-    )
+    subject = "Account Verification"
+    body = f"""
+        <div style="font-style: italic;">
+            <p>Welcome! We are sending this email to notify you about an important event.</p>
+            <p>Please click the <a href="{verification_link}">link</a> to verify your account.</p>
+            <p>Best regards,<br>FastAPI</p>
+        </div>
+    """
+    background_tasks.add_task(send_message, [user_email], subject, body)
 
     return {
         "message": "Signed up successfully! Please check email to verify your account",
@@ -105,11 +112,18 @@ async def request_password_reset(
     background_tasks: BackgroundTasks,
 ):
     # LINK TO CONFIRM PASSWORD RESET INTERFACE.
-    token = create_url_safe_token({"email": data.email})
-    verification_link = f".../{token}"
-    background_tasks.add_task(
-        send_password_reset_message, data.email, verification_link
-    )
+    user_email = data.email
+    token = create_url_safe_token({"email": user_email})
+    verification_link = f"http://127.0.0.1:8000/auth/reset_password/{token}"
+    subject = "Password Reset"
+    body = f"""
+        <div style="font-style: italic;">
+            <p>Welcome! We are sending this email to notify you about an important event.</p>
+            <p>Please click the <a href="{verification_link}">link</a> to reset your account password.</p>
+            <p>Best regards,<br>FastAPI</p>
+        </div>
+    """
+    background_tasks.add_task(send_message, [user_email], subject, body)
 
     return {
         "message": "Requested successfully! Please check email to reset your account password"
