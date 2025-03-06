@@ -1,3 +1,4 @@
+from pydantic import EmailStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,7 +12,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRY: int = 3600
     REFRESH_TOKEN_EXPIRY: int = 172800
     # MAIL.
-    MAIL_ADDRESS: str
+    MAIL_ADDRESS: EmailStr
     MAIL_PASSWORD: str
     MAIL_PORT: int = 587
     MAIL_SERVER: str = "smtp.gmail.com"
