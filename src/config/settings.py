@@ -1,3 +1,4 @@
+from pathlib import Path
 from pydantic import EmailStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -9,6 +10,8 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     # DATABASE.
     DATABASE_URL: str
+    # PASSWORD.
+    HASH_ALGORITHM: list[str] = ["bcrypt"]
     # JWT.
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRY: int = 3600
@@ -21,6 +24,9 @@ class Settings(BaseSettings):
     MAIL_STARTTLS: bool = True
     MAIL_SSL_TLS: bool = False
     MAIL_FROM_NAME: str = "FastAPI"
+    MAIL_TEMPLATE_FOLDER: Path = (
+        Path(__file__).resolve().parent.parent / "mail/templates"
+    )
     VERIFY_EMAIL_TOKEN_EXPIRY: int = 900
     RESET_PASSWORD_TOKEN_EXPIRY: int = 900
 

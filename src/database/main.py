@@ -1,14 +1,7 @@
-from fastapi import Depends
-from sqlmodel import create_engine, Session
 from typing import Annotated
-from config import settings
-
-
-engine = create_engine(
-    settings.DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    echo=True,
-)
+from fastapi import Depends
+from sqlmodel import Session
+from .config import engine
 
 
 def get_session():
