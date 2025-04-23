@@ -66,7 +66,7 @@ async def create_account(
 
 @router.get("/verify/{token}", name="verify_email")
 def verify_email_account(token: str, session: DatabaseSession):
-    token_data = decode_url_safe_token(token, settings.EMAIL_VERIFICATION_TOKEN_EXPIRY)
+    token_data = decode_url_safe_token(token, settings.VERIFY_EMAIL_TOKEN_EXPIRY)
     if token_data is None:
         raise InvalidTokenError()
     user_email = token_data.get("email")
@@ -132,7 +132,7 @@ async def request_password_reset(
 
 @router.post("/reset_password/{token}")
 def reset_password(token: str, data: PasswordResetConfirm, session: DatabaseSession):
-    token_data = decode_url_safe_token(token, settings.PASSWORD_RESET_TOKEN_EXPIRY)
+    token_data = decode_url_safe_token(token, settings.RESET_PASSWORD_TOKEN_EXPIRY)
     if token_data is None:
         raise InvalidTokenError()
     user_email = token_data.get("email")
