@@ -4,9 +4,9 @@
 git clone https://github.com/BIN-PDT/WEBAUTH_FASTAPI.git && rm -rf WEBAUTH_FASTAPI/.git
 ```
 
-_For privacy reasons, replace the sensitive information in `.env` with your own._
+_For privacy reasons, follow the format of `.env.example` and replace the sensitive information in `.env` with your own._
 
--   _Replace `MAIL_ADDRESS` & `MAIL_PASSWORD` (Application Password) with your Gmail Account_.
+-   _Replace `MAIL_USERNAME` & `MAIL_PASSWORD` (Application Password) with your Gmail Account_.
 
 -   _Generate `SECRET_KEY`_.
 
@@ -46,14 +46,8 @@ pip install -r requirements.txt
 alembic upgrade head
 ```
 
-**5. RUN TEST**
+**5. RUN APPLICATION**
 
 ```
-pytest
-```
-
-**6. RUN APPLICATION**
-
-```
-fastapi dev main.py
+fastapi dev src/main.py
 ```
