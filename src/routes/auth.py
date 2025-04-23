@@ -13,6 +13,7 @@ from exceptions.user_exceptions import (
     ConfirmPasswordMismatchException,
 )
 from database.main import DatabaseSession
+from token_blacklist.main import revoke_token, check_revoked_token
 from schemas.api_response import APIResponse
 from schemas.user_schemas import UserPublic, UserCreate, UserUpdate
 from schemas.signin_schema import SignInSchema
@@ -58,7 +59,7 @@ def signup(
 @router.get("/verify-email/{token}", name="verify_email")
 def verify_email(token: Annotated[str, Path()], session: DatabaseSession):
     payload = decode_mail_token(token, settings.VERIFY_EMAIL_TOKEN_EXPIRY)
-    if payload is None:
+    if payload is None or check_revoked_token(payload["mti"]):
         raise InvalidTokenException()
     email = payload.get("email")
     if email is None:
@@ -69,6 +70,8 @@ def verify_email(token: Annotated[str, Path()], session: DatabaseSession):
 
     data = UserUpdate(is_verified=True)
     UserService.update(session, user, data)
+
+    revoke_token(payload["mti"], settings.VERIFY_EMAIL_TOKEN_EXPIRY)
 
     return APIResponse(
         status_code=status.HTTP_200_OK,
@@ -114,7 +117,7 @@ def reset_password(
     session: DatabaseSession,
 ):
     payload = decode_mail_token(token, settings.RESET_PASSWORD_TOKEN_EXPIRY)
-    if payload is None:
+    if payload is None or check_revoked_token(payload["mti"]):
         raise InvalidTokenException()
     email = payload.get("email")
     if email is None:
@@ -128,6 +131,8 @@ def reset_password(
     hashed_password = hash_password(data.password)
     update_data = UserUpdate(password=hashed_password)
     UserService.update(session, user, update_data)
+
+    revoke_token(payload["mti"], settings.RESET_PASSWORD_TOKEN_EXPIRY)
 
     return APIResponse(
         status_code=status.HTTP_200_OK,
@@ -149,6 +154,8 @@ def refresh_token(
     ):
         raise InvalidTokenException()
 
+    revoke_token(access_payload["jti"], settings.REFRESH_TOKEN_EXPIRY)
+
     return APIResponse(
         status_code=status.HTTP_200_OK,
         message="Refreshed tokens successfully.",
@@ -158,6 +165,8 @@ def refresh_token(
 
 @router.get("/signout")
 def signout(access_payload: AccessTokenValidator):
+    revoke_token(access_payload["jti"], settings.REFRESH_TOKEN_EXPIRY)
+
     return APIResponse(
         status_code=status.HTTP_200_OK,
         message="Signed out successfully.",

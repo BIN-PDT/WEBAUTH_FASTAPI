@@ -8,6 +8,7 @@ from exceptions.auth_exceptions import (
     InvalidRefreshTokenException,
     UnauthenticatedException,
 )
+from token_blacklist.main import check_revoked_token
 from utils.tokens.auth_token import decode_auth_token
 
 
@@ -22,11 +23,14 @@ class TokenBearer(HTTPBearer, metaclass=ABCMeta):
             raise UnauthenticatedException()
 
         payload = decode_auth_token(creds.credentials)
-        if payload is None:
+        if payload is None or not self.validate_token(payload):
             raise InvalidTokenException()
         self.verify_token(payload)
 
         return payload
+
+    def validate_token(self, token_data: dict) -> bool:
+        return not check_revoked_token(token_data["jti"])
 
     @abstractmethod
     def verify_token(self, token_data: dict) -> None: ...
