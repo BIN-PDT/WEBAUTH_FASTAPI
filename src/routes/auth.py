@@ -53,7 +53,7 @@ def signup(
         status_code=status.HTTP_201_CREATED,
         message="Signed up successfully.",
         data=UserPublic(**user.model_dump()),
-    ).send()
+    )
 
 
 @router.get("/verify-email/{token}", name="verify_email")
@@ -76,7 +76,7 @@ def verify_email(token: Annotated[str, Path()], session: DatabaseSession):
     return APIResponse(
         status_code=status.HTTP_200_OK,
         message="Verified email successfully.",
-    ).send()
+    )
 
 
 @router.post("/signin")
@@ -90,7 +90,7 @@ def signin(data: Annotated[SignInSchema, Body()], session: DatabaseSession):
         status_code=status.HTTP_200_OK,
         message="Signed in successfully.",
         data={**create_auth_token_pair(user), "user": UserPublic(**user.model_dump())},
-    ).send()
+    )
 
 
 @router.post("/reset-password")
@@ -107,7 +107,7 @@ async def request_password_reset(
     return APIResponse(
         status_code=status.HTTP_200_OK,
         message="Requested reset password successfully.",
-    ).send()
+    )
 
 
 @router.patch("/reset-password/{token}")
@@ -137,7 +137,7 @@ def reset_password(
     return APIResponse(
         status_code=status.HTTP_200_OK,
         message="Confirmed reset password successfully.",
-    ).send()
+    )
 
 
 @router.post("/refresh-token")
@@ -160,7 +160,7 @@ def refresh_token(
         status_code=status.HTTP_200_OK,
         message="Refreshed tokens successfully.",
         data={**create_auth_token_pair(current_user)},
-    ).send()
+    )
 
 
 @router.get("/signout")
@@ -170,4 +170,4 @@ def signout(access_payload: AccessTokenValidator):
     return APIResponse(
         status_code=status.HTTP_200_OK,
         message="Signed out successfully.",
-    ).send()
+    )

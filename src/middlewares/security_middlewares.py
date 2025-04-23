@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
 
-def add_security_middleware(app: FastAPI):
+def add_security_middlewares(app: FastAPI):
     app.add_middleware(
         CORSMiddleware,
         allow_origins=("*",),
