@@ -9,7 +9,7 @@ _For privacy reasons, follow the format of `.env.example` and replace the sensit
 -   _Optionally, register Redis Database or Redis Cloud to obtain `REDIS_URL` for Celery_.
 
     ```
-    celery -A src.celery_tasks.config worker --pool=solo
+    celery -A src.celery_tasks.config worker -P solo
     ```
 
 -   _Replace `MAIL_USERNAME` & `MAIL_PASSWORD` (Application Password) with your Gmail Account_.
