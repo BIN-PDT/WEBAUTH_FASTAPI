@@ -9,6 +9,7 @@ from exceptions.auth_exceptions import (
 from exceptions.user_exceptions import (
     DuplicateUsernameException,
     DuplicateEmailException,
+    VerifiedEmailException,
     WrongPasswordException,
     UserNotFoundException,
     ConfirmPasswordMismatchException,
@@ -23,6 +24,7 @@ from schemas.reset_password_schemas import (
     PasswordResetConfirmSchema,
 )
 from schemas.refresh_token_schema import RefreshTokenSchema
+from schemas.change_email_schema import ChangeEmailSchema
 from schemas.change_password_schema import ChangePasswordSchema
 from services.user_service import UserService
 from dependencies.jwt_validators import AccessTokenValidator
@@ -162,6 +164,43 @@ def refresh_token(
         status_code=status.HTTP_200_OK,
         message="Refreshed tokens successfully.",
         data={**create_auth_token_pair(current_user)},
+    )
+
+
+@router.patch("/change-email")
+def change_email(
+    current_user: CurrentUserValidator,
+    data: Annotated[ChangeEmailSchema, Body()],
+    session: DatabaseSession,
+):
+    if UserService.find_by_email(session, data.email):
+        raise DuplicateEmailException()
+
+    current_user.email = data.email
+    current_user.is_verified = False
+    session.add(current_user)
+    session.commit()
+
+    return APIResponse(
+        status_code=status.HTTP_200_OK,
+        message="Changed email successfully.",
+    )
+
+
+@router.get("/send-email-verification")
+def send_email_verification(
+    request: Request,
+    current_user: CurrentUserValidator,
+    background_tasks: BackgroundTasks,
+):
+    if current_user.is_verified:
+        raise VerifiedEmailException()
+
+    send_verify_email_message(current_user.email, request, background_tasks)
+
+    return APIResponse(
+        status_code=status.HTTP_200_OK,
+        message="Sended email verification successfully.",
     )
 
 
