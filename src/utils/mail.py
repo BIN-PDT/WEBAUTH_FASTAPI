@@ -1,6 +1,6 @@
 from fastapi import Request, BackgroundTasks
-from mail.main import create_message, send_message
-from .tokens.mail_token import create_mail_token
+from src.mail.main import create_message, send_message
+from src.utils.tokens.mail_token import create_mail_token
 
 
 def create_verification_link(email: str, url_name: str, request: Request):

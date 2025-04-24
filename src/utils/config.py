@@ -1,6 +1,6 @@
 from passlib.context import CryptContext
 from itsdangerous import URLSafeTimedSerializer
-from config.settings import settings
+from src.config.settings import settings
 
 
 crypt_context = CryptContext(schemes=settings.HASH_ALGORITHM)

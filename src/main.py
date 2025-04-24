@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from routes.index import router
-from middlewares.exception_handlers import add_exception_handlers
-from middlewares.security_middlewares import add_security_middlewares
-from middlewares.response_middlewares import add_response_middlewares
+from src.routes.index import router
+from src.middlewares.exception_handlers import add_exception_handlers
+from src.middlewares.security_middlewares import add_security_middlewares
+from src.middlewares.response_middlewares import add_response_middlewares
 
 
 app = FastAPI()

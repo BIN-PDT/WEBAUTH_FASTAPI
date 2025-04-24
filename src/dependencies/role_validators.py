@@ -1,7 +1,7 @@
 from fastapi import Depends
-from exceptions.auth_exceptions import InsufficientPermissionException
-from models.user import RoleEnum
-from .current_user_validator import CurrentUserValidator
+from src.exceptions.auth_exceptions import InsufficientPermissionException
+from src.models.user import RoleEnum
+from src.dependencies.current_user_validator import CurrentUserValidator
 
 
 class RoleChecker:

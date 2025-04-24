@@ -1,12 +1,12 @@
 from typing import Annotated
 from fastapi import APIRouter, status, Request, BackgroundTasks
 from fastapi import Body, Path
-from config.settings import settings
-from exceptions.auth_exceptions import (
+from src.config.settings import settings
+from src.exceptions.auth_exceptions import (
     InvalidTokenException,
     InvalidLoginCredentialsException,
 )
-from exceptions.user_exceptions import (
+from src.exceptions.user_exceptions import (
     DuplicateUsernameException,
     DuplicateEmailException,
     VerifiedEmailException,
@@ -14,25 +14,25 @@ from exceptions.user_exceptions import (
     UserNotFoundException,
     ConfirmPasswordMismatchException,
 )
-from database.main import DatabaseSession
-from token_blacklist.main import revoke_token, check_revoked_token
-from schemas.api_response import APIResponse
-from schemas.user_schemas import UserPublic, UserCreate, UserUpdate
-from schemas.signin_schema import SignInSchema
-from schemas.reset_password_schemas import (
+from src.database.main import DatabaseSession
+from src.token_blacklist.main import revoke_token, check_revoked_token
+from src.schemas.api_response import APIResponse
+from src.schemas.user_schemas import UserPublic, UserCreate, UserUpdate
+from src.schemas.signin_schema import SignInSchema
+from src.schemas.reset_password_schemas import (
     PasswordResetRequestSchema,
     PasswordResetConfirmSchema,
 )
-from schemas.refresh_token_schema import RefreshTokenSchema
-from schemas.change_email_schema import ChangeEmailSchema
-from schemas.change_password_schema import ChangePasswordSchema
-from services.user_service import UserService
-from dependencies.jwt_validators import AccessTokenValidator
-from dependencies.current_user_validator import CurrentUserValidator
-from utils.password import hash_password, verify_password
-from utils.mail import send_verify_email_message, send_reset_password_message
-from utils.tokens.mail_token import decode_mail_token
-from utils.tokens.auth_token import create_auth_token_pair, decode_auth_token
+from src.schemas.refresh_token_schema import RefreshTokenSchema
+from src.schemas.change_email_schema import ChangeEmailSchema
+from src.schemas.change_password_schema import ChangePasswordSchema
+from src.services.user_service import UserService
+from src.dependencies.jwt_validators import AccessTokenValidator
+from src.dependencies.current_user_validator import CurrentUserValidator
+from src.utils.password import hash_password, verify_password
+from src.utils.mail import send_verify_email_message, send_reset_password_message
+from src.utils.tokens.mail_token import decode_mail_token
+from src.utils.tokens.auth_token import create_auth_token_pair, decode_auth_token
 
 
 router = APIRouter()

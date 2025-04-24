@@ -1,5 +1,5 @@
 from fastapi_mail import MessageSchema, MessageType
-from .config import mail
+from src.mail.config import mail
 
 
 def create_message(recipients: list[str], subject: str, context: dict) -> MessageSchema:

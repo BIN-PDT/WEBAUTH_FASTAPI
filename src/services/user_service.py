@@ -1,7 +1,7 @@
 from sqlmodel import Session, select
-from models.user import User
-from schemas.user_schemas import UserCreate, UserUpdate
-from utils.password import hash_password
+from src.models.user import User
+from src.schemas.user_schemas import UserCreate, UserUpdate
+from src.utils.password import hash_password
 
 
 class UserService:

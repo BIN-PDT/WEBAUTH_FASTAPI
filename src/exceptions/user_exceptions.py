@@ -1,5 +1,5 @@
 from fastapi import status
-from .base_exception import BaseException
+from src.exceptions.base_exception import BaseException
 
 
 class DuplicateUsernameException(BaseException):

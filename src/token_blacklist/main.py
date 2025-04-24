@@ -1,4 +1,4 @@
-from .config import redis_client
+from src.token_blacklist.config import redis_client
 
 
 def revoke_token(token_id: str, ttl: int):

@@ -1,10 +1,10 @@
 from typing import Annotated
 from fastapi import Depends
-from exceptions.user_exceptions import UserNotFoundException
-from database.main import DatabaseSession
-from models.user import User
-from services.user_service import UserService
-from .jwt_validators import AccessTokenValidator
+from src.exceptions.user_exceptions import UserNotFoundException
+from src.database.main import DatabaseSession
+from src.models.user import User
+from src.services.user_service import UserService
+from src.dependencies.jwt_validators import AccessTokenValidator
 
 
 def get_current_user(session: DatabaseSession, payload: AccessTokenValidator):

@@ -1,5 +1,5 @@
 from uuid import uuid4
-from utils.config import url_token_serializer
+from src.utils.config import url_token_serializer
 
 
 def create_mail_token(data: dict) -> str:

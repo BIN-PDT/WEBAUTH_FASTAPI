@@ -1,8 +1,8 @@
 from uuid import uuid4
 from datetime import datetime, timezone, timedelta
 import jwt
-from config.settings import settings
-from models.user import User
+from src.config.settings import settings
+from src.models.user import User
 
 
 def create_token(payload: dict, type: str, expiry: timedelta):

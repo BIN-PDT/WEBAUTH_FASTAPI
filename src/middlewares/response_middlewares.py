@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request
-from schemas.api_response import APIResponse
+from src.schemas.api_response import APIResponse
 
 
 def add_response_middlewares(app: FastAPI):

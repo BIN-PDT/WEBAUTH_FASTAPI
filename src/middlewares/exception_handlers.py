@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
-from exceptions.base_exception import BaseException
-from schemas.api_response import APIResponse
+from src.exceptions.base_exception import BaseException
+from src.schemas.api_response import APIResponse
 
 
 def add_exception_handlers(app: FastAPI):

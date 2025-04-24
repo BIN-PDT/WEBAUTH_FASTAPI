@@ -1,6 +1,6 @@
 from enum import Enum
-from sqlmodel import SQLModel, Field, String
 from datetime import datetime, timezone
+from sqlmodel import SQLModel, Field, String
 
 
 class RoleEnum(str, Enum):

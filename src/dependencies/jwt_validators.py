@@ -2,14 +2,14 @@ from typing import Annotated
 from abc import ABCMeta, abstractmethod
 from fastapi import Request, Depends
 from fastapi.security import HTTPBearer
-from exceptions.auth_exceptions import (
+from src.exceptions.auth_exceptions import (
     InvalidTokenException,
     InvalidAccessTokenException,
     InvalidRefreshTokenException,
     UnauthenticatedException,
 )
-from token_blacklist.main import check_revoked_token
-from utils.tokens.auth_token import decode_auth_token
+from src.token_blacklist.main import check_revoked_token
+from src.utils.tokens.auth_token import decode_auth_token
 
 
 class TokenBearer(HTTPBearer, metaclass=ABCMeta):

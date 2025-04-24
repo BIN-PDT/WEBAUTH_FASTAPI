@@ -1,4 +1,4 @@
-from .config import crypt_context
+from src.utils.config import crypt_context
 
 
 def hash_password(password: str) -> str:

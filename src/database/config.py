@@ -1,5 +1,5 @@
 from sqlmodel import create_engine
-from config.settings import settings
+from src.config.settings import settings
 
 
 engine = create_engine(

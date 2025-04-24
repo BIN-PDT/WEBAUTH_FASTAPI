@@ -1,5 +1,5 @@
 from fastapi_mail import FastMail, ConnectionConfig
-from config.settings import settings
+from src.config.settings import settings
 
 mail = FastMail(
     ConnectionConfig(
