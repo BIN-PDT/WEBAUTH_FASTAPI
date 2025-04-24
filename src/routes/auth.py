@@ -194,3 +194,20 @@ def signout(access_payload: AccessTokenValidator):
         status_code=status.HTTP_200_OK,
         message="Signed out successfully.",
     )
+
+
+@router.delete("/delete-account")
+def delete_account(
+    access_payload: AccessTokenValidator,
+    current_user: CurrentUserValidator,
+    session: DatabaseSession,
+):
+    session.delete(current_user)
+    session.commit()
+
+    revoke_token(access_payload["jti"], settings.REFRESH_TOKEN_EXPIRY)
+
+    return APIResponse(
+        status_code=status.HTTP_200_OK,
+        message="Deleted account successfully.",
+    )
