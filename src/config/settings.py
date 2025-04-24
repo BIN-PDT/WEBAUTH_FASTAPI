@@ -4,12 +4,17 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="forbid")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="forbid",
+        env_ignore_empty=True,
+    )
 
     # GENERAL.
     SECRET_KEY: str
     # DATABASE.
     DATABASE_URL: str
+    REDIS_URL: str | None = None
     # PASSWORD.
     HASH_ALGORITHM: list[str] = ["bcrypt"]
     # JWT.

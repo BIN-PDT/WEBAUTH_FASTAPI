@@ -3,9 +3,9 @@ from src.mail.main import create_message, send_message
 from src.utils.tokens.mail_token import create_mail_token
 
 
-def create_verification_link(email: str, url_name: str, request: Request):
+def create_verification_link(email: str, url_name: str, request: Request) -> str:
     token = create_mail_token({"email": email})
-    return request.url_for(url_name, token=token)
+    return str(request.url_for(url_name, token=token))
 
 
 def send_verify_email_message(

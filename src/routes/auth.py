@@ -30,9 +30,17 @@ from src.services.user_service import UserService
 from src.dependencies.jwt_validators import AccessTokenValidator
 from src.dependencies.current_user_validator import CurrentUserValidator
 from src.utils.password import hash_password, verify_password
-from src.utils.mail import send_verify_email_message, send_reset_password_message
+from src.utils.mail import (
+    create_verification_link,
+    send_verify_email_message,
+    send_reset_password_message,
+)
 from src.utils.tokens.mail_token import decode_mail_token
 from src.utils.tokens.auth_token import create_auth_token_pair, decode_auth_token
+from src.celery_tasks.tasks import (
+    send_verify_email_message_task,
+    send_reset_password_message_task,
+)
 
 
 router = APIRouter()
@@ -51,7 +59,12 @@ def signup(
         raise DuplicateEmailException()
 
     user = UserService.create(session, data)
-    send_verify_email_message(user.email, request, background_tasks)
+
+    if settings.REDIS_URL is None:
+        send_verify_email_message(user.email, request, background_tasks)
+    else:
+        link = create_verification_link(user.email, "verify_email", request)
+        send_verify_email_message_task.delay(user.email, link)
 
     return APIResponse(
         status_code=status.HTTP_201_CREATED,
@@ -106,7 +119,11 @@ async def request_password_reset(
 ):
     user = UserService.find_by_email(session, data.email)
     if user:
-        send_reset_password_message(user.email, request, background_tasks)
+        if settings.REDIS_URL is None:
+            send_reset_password_message(user.email, request, background_tasks)
+        else:
+            link = create_verification_link(user.email, "reset_password", request)
+            send_reset_password_message_task.delay(user.email, link)
 
     return APIResponse(
         status_code=status.HTTP_200_OK,
@@ -114,8 +131,8 @@ async def request_password_reset(
     )
 
 
-@router.patch("/reset-password/{token}")
-def reset_password(
+@router.patch("/reset-password/{token}", name="reset_password")
+def confirm_password_reset(
     token: Annotated[str, Path()],
     data: Annotated[PasswordResetConfirmSchema, Body()],
     session: DatabaseSession,
@@ -196,7 +213,11 @@ def send_email_verification(
     if current_user.is_verified:
         raise VerifiedEmailException()
 
-    send_verify_email_message(current_user.email, request, background_tasks)
+    if settings.REDIS_URL is None:
+        send_verify_email_message(current_user.email, request, background_tasks)
+    else:
+        link = create_verification_link(current_user.email, "verify_email", request)
+        send_verify_email_message_task.delay(current_user.email, link)
 
     return APIResponse(
         status_code=status.HTTP_200_OK,
