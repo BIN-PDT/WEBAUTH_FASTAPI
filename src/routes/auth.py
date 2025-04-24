@@ -9,6 +9,7 @@ from exceptions.auth_exceptions import (
 from exceptions.user_exceptions import (
     DuplicateUsernameException,
     DuplicateEmailException,
+    WrongPasswordException,
     UserNotFoundException,
     ConfirmPasswordMismatchException,
 )
@@ -22,6 +23,7 @@ from schemas.reset_password_schemas import (
     PasswordResetConfirmSchema,
 )
 from schemas.refresh_token_schema import RefreshTokenSchema
+from schemas.change_password_schema import ChangePasswordSchema
 from services.user_service import UserService
 from dependencies.jwt_validators import AccessTokenValidator
 from dependencies.current_user_validator import CurrentUserValidator
@@ -160,6 +162,27 @@ def refresh_token(
         status_code=status.HTTP_200_OK,
         message="Refreshed tokens successfully.",
         data={**create_auth_token_pair(current_user)},
+    )
+
+
+@router.patch("/change-password")
+def change_password(
+    current_user: CurrentUserValidator,
+    data: Annotated[ChangePasswordSchema, Body()],
+    session: DatabaseSession,
+):
+    if data.password != data.password2:
+        raise ConfirmPasswordMismatchException()
+    if not verify_password(data.old_password, current_user.password):
+        raise WrongPasswordException()
+
+    current_user.password = hash_password(data.password)
+    session.add(current_user)
+    session.commit()
+
+    return APIResponse(
+        status_code=status.HTTP_200_OK,
+        message="Changed password successfully.",
     )
 
 

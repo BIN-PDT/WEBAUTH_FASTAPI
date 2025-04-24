@@ -12,6 +12,11 @@ class DuplicateEmailException(BaseException):
     detail = {"message": "User with email already in use."}
 
 
+class WrongPasswordException(BaseException):
+    status_code = status.HTTP_409_CONFLICT
+    detail = {"message": "Wrong password."}
+
+
 class UserNotFoundException(BaseException):
     status_code = status.HTTP_404_NOT_FOUND
     detail = {"message": "User not found."}
