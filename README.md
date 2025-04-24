@@ -6,6 +6,12 @@ git clone https://github.com/BIN-PDT/WEBAUTH_FASTAPI.git && rm -rf WEBAUTH_FASTA
 
 _For privacy reasons, follow the format of `.env.example` and replace the sensitive information in `.env` with your own._
 
+-   _Optionally, register Redis Database or Redis Cloud to obtain `REDIS_URL` for Celery_.
+
+    ```
+    celery -A src.celery_tasks.config worker --pool=solo
+    ```
+
 -   _Replace `MAIL_USERNAME` & `MAIL_PASSWORD` (Application Password) with your Gmail Account_.
 
 -   _Generate `SECRET_KEY`_.
